@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Project - Text to Speech Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
+        letter-spacing: 2px;
+    }
+
+    .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .content {
+        padding: 40px;
+    }
+
+    .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .control-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .control-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    select, input[type="range"] {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    select:focus, input[type="range"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .range-container {
+        position: relative;
+    }
+
+    .range-value {
+        position: absolute;
+        right: 0;
+        top: -25px;
+        background: #667eea;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .textarea-container {
+        margin-bottom: 30px;
+    }
+
+    .textarea-container label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    textarea {
+        width: 100%;
+        height: 200px;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 15px;
+        font-size: 16px;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .reading-area {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        min-height: 120px;
+        border: 2px solid #e9ecef;
+    }
+
+    .reading-area h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .reading-text {
+        font-size: 18px;
+        line-height: 1.8;
+        color: #2c3e50;
+    }
+
+    .sentence {
+        transition: all 0.3s ease;
+        padding: 2px 4px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .sentence:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+
+    .sentence.current {
+        background-color: #667eea;
+        color: white;
+        transform: scale(1.02);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 15px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        min-width: 120px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+        background: #d0d0d0;
+        transform: translateY(-1px);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .status {
+        text-align: center;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .status.playing {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+
+    .status.paused {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .status.stopped {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin: 20px 0;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.1s ease;
+        border-radius: 3px;
+    }
+
+    @media (max-width: 768px) {
+        .controls {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        button {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>S PROJECT</h1>
+            <p>Advanced Text to Speech Reader</p>
+        </div>
+
+```
+    <div class="content">
+        <div class="controls">
+            <div class="control-group">
+                <label for="voiceAge">👤 Voice Age</label>
+                <select id="voiceAge">
+                    <option value="auto">Auto Select</option>
+                    <option value="young">Young Adult</option>
+                    <option value="middle">Middle Age</option>
+                    <option value="mature">Mature</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="voiceStyle">🎪 Voice Style</label>
+                <select id="voiceStyle">
+                    <option value="natural">Natural</option>
+                    <option value="robotic">Robotic</option>
+                    <option value="dramatic">Dramatic</option>
+                    <option value="whisper">Whisper</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="voiceVariation">🎨 Voice Variation</label>
+                <select id="voiceVariation">
+                    <option value="soft">Soft & Gentle</option>
+                    <option value="clear">Clear & Crisp</option>
+                    <option value="warm">Warm & Friendly</option>
+                    <option value="professional">Professional</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="controls secondary-controls" style="margin-top: 15px;">
+            <div class="control-group">
+                <label for="rateRange">🏃 Speech Rate</label>
+                <div class="range-container">
+                    <span class="range-value" id="rateValue">1.0x</span>
+                    <input type="range" id="rateRange" min="0.3" max="3.0" step="0.1" value="1.0">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="pitchRange">🎵 Voice Pitch</label>
+                <div class="range-container">
+                    <span class="range-value" id="pitchValue">1.0</span>
+                    <input type="range" id="pitchRange" min="0.1" max="2.5" step="0.1" value="1.0">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="volumeRange">🔊 Volume</label>
+                <div class="range-container">
+                    <span class="range-value" id="volumeValue">1.0</span>
+                    <input type="range" id="volumeRange" min="0.1" max="1.0" step="0.1" value="1.0">
+                </div>
+            </div>
+        </div>
+        
+        <div class="textarea-container">
+            <label for="textInput">Paste your English text here:</label>
+            <textarea id="textInput" placeholder="Paste your English text here and click 'Read' to start listening...
+```
+
+Example: Hello! Welcome to the S Project. This is an advanced text-to-speech reader that can read your text aloud with synchronized highlighting. You can adjust the voice, speed, and pitch to your preference.”></textarea>
+</div>
+
+```
+        <div class="reading-area">
+            <h3>📖 Reading Display</h3>
+            <div class="voice-info" id="voiceInfo" style="margin-bottom: 15px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; font-size: 14px; color: #667eea;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>🎤 Current Voice:</strong> <span id="currentVoiceDisplay">Auto-selecting best voice...</span></span>
+                    <button id="voiceTestBtn" style="padding: 5px 15px; background: #667eea; color: white; border: none; border-radius: 15px; font-size: 12px; cursor: pointer;">🔊 Test Voice</button>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
+                    💡 <strong>Voice Filters:</strong> Adjust gender, age, and style to find your perfect voice. Use extreme pitch values for dramatic effects!
+                </div>
+            </div>
+            <div class="reading-text" id="readingText">
+                Your text will appear here with synchronized highlighting as it's being read.
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="buttons">
+            <button id="readBtn" class="btn-primary">🎵 Read</button>
+            <button id="pauseBtn" class="btn-secondary" disabled>⏸️ Pause</button>
+            <button id="resumeBtn" class="btn-secondary" disabled>▶️ Resume</button>
+            <button id="stopBtn" class="btn-danger" disabled>⏹️ Stop</button>
+        </div>
+        
+        <div class="status stopped" id="status">Ready to read</div>
+    </div>
+</div>
+
+<script>
+    class TextToSpeechReader {
+        constructor() {
+            this.synthesis = window.speechSynthesis;
+            this.utterance = null;
+            this.sentences = [];
+            this.currentSentenceIndex = 0;
+            this.isReading = false;
+            this.isPaused = false;
+            this.availableVoices = [];
+            this.currentVoice = null;
+            
+            this.initializeElements();
+            this.loadVoices();
+            this.setupEventListeners();
+        }
+        
+        initializeElements() {
+            this.textInput = document.getElementById('textInput');
+            this.readingText = document.getElementById('readingText');
+            this.voiceAge = document.getElementById('voiceAge');
+            this.voiceStyle = document.getElementById('voiceStyle');
+            this.voiceVariation = document.getElementById('voiceVariation');
+            this.rateRange = document.getElementById('rateRange');
+            this.pitchRange = document.getElementById('pitchRange');
+            this.volumeRange = document.getElementById('volumeRange');
+            this.rateValue = document.getElementById('rateValue');
+            this.pitchValue = document.getElementById('pitchValue');
+            this.volumeValue = document.getElementById('volumeValue');
+            this.voiceInfo = document.getElementById('voiceInfo');
+            this.currentVoiceDisplay = document.getElementById('currentVoiceDisplay');
+            this.voiceTestBtn = document.getElementById('voiceTestBtn');
+            this.readBtn = document.getElementById('readBtn');
+            this.pauseBtn = document.getElementById('pauseBtn');
+            this.resumeBtn = document.getElementById('resumeBtn');
+            this.stopBtn = document.getElementById('stopBtn');
+            this.status = document.getElementById('status');
+            this.progressFill = document.getElementById('progressFill');
+        }
+        
+        loadVoices() {
+            const updateVoices = () => {
+                this.availableVoices = this.synthesis.getVoices().filter(voice => 
+                    voice.lang.startsWith('en-') || voice.lang === 'en'
+                );
+                
+                if (this.availableVoices.length > 0) {
+                    this.selectOptimalVoice();
+                } else {
+                    this.currentVoiceDisplay.textContent = 'No English voices available';
+                }
+            };
+            
+            updateVoices();
+            
+            if (this.synthesis.onvoiceschanged !== undefined) {
+                this.synthesis.onvoiceschanged = updateVoices;
+            }
+        }
+        
+        selectOptimalVoice() {
+            const ageFilter = this.voiceAge.value;
+            
+            let filteredVoices = [...this.availableVoices];
+            
+            // Filter for female/neutral voices only (no male voices)
+            filteredVoices = filteredVoices.filter(voice => {
+                const gender = this.detectGender(voice.name);
+                return gender === 'female' || gender === 'unknown';
+            });
+            
+            // Age filtering
+            if (ageFilter === 'young') {
+                const youngVoices = filteredVoices.filter(voice => 
+                    this.detectAge(voice.name) === 'young'
+                );
+                if (youngVoices.length > 0) filteredVoices = youngVoices;
+            } else if (ageFilter === 'middle') {
+                const middleVoices = filteredVoices.filter(voice => 
+                    this.detectAge(voice.name) === 'middle'
+                );
+                if (middleVoices.length > 0) filteredVoices = middleVoices;
+            } else if (ageFilter === 'mature') {
+                const matureVoices = filteredVoices.filter(voice => 
+                    this.detectAge(voice.name) === 'mature'
+                );
+                if (matureVoices.length > 0) filteredVoices = matureVoices;
+            }
+            
+            // If no voices match filters, use all available
+            if (filteredVoices.length === 0) {
+                filteredVoices = this.availableVoices;
+            }
+            
+            // Select the best quality voice from filtered results
+            const bestVoice = this.findBestQualityVoice(filteredVoices);
+            this.currentVoice = bestVoice;
+            
+            // Update display
+            if (bestVoice) {
+                const age = this.detectAge(bestVoice.name);
+                const variation = this.voiceVariation.value;
+                this.currentVoiceDisplay.textContent = `${bestVoice.name} (${age}, ${variation})`;
+            }
+        }
+        
+        detectGender(voiceName) {
+            const name = voiceName.toLowerCase();
+            const femaleNames = ['female', 'woman', 'aria', 'zira', 'hazel', 'susan', 'samantha', 'victoria', 'karen', 'serena', 'jenny', 'bella', 'emily', 'emma', 'sophie', 'alice', 'mary', 'linda', 'sarah', 'anna'];
+            const maleNames = ['male', 'man', 'david', 'mark', 'richard', 'george', 'james', 'alex', 'guy', 'tom', 'john', 'mike', 'paul', 'steve', 'chris', 'daniel', 'andrew', 'kevin', 'brian', 'eric'];
+            
+            if (femaleNames.some(fn => name.includes(fn))) return 'female';
+            if (maleNames.some(mn => name.includes(mn))) return 'male';
+            return 'unknown';
+        }
+        
+        detectAge(voiceName) {
+            const name = voiceName.toLowerCase();
+            const youngNames = ['young', 'child', 'teen', 'junior', 'bella', 'emily', 'emma', 'sophie'];
+            const matureNames = ['mature', 'senior', 'elder', 'old', 'richard', 'george', 'linda', 'mary'];
+            
+            if (youngNames.some(yn => name.includes(yn))) return 'young';
+            if (matureNames.some(mn => name.includes(mn))) return 'mature';
+            return 'middle';
+        }
+        
+        findBestQualityVoice(voices) {
+            // Priority: local service > known quality brands > first available
+            const priorityOrder = [
+                voice => voice.localService && (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Apple')),
+                voice => voice.localService,
+                voice => voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Apple'),
+                voice => true
+            ];
+            
+            for (const priority of priorityOrder) {
+                const match = voices.find(priority);
+                if (match) return match;
+            }
+            
+            return voices[0] || null;
+        }
+        
+        applyVoiceEffects(utterance) {
+            const style = this.voiceStyle.value;
+            let rate = parseFloat(this.rateRange.value);
+            let pitch = parseFloat(this.pitchRange.value);
+            
+            // Apply style modifications
+            switch(style) {
+                case 'robotic':
+                    pitch = Math.max(0.1, pitch - 0.3);
+                    rate = Math.max(0.3, rate - 0.2);
+                    break;
+                case 'dramatic':
+                    pitch = Math.min(2.5, pitch + 0.2);
+                    rate = Math.max(0.3, rate - 0.3);
+                    break;
+                case 'whisper':
+                    pitch = Math.max(0.1, pitch - 0.4);
+                    rate = Math.max(0.3, rate - 0.4);
+                    break;
+                case 'natural':
+                default:
+                    // Keep original values
+                    break;
+            }
+            
+            utterance.rate = rate;
+            utterance.pitch = pitch;
+            utterance.volume = parseFloat(this.volumeRange.value);
+            
+            if (this.currentVoice) {
+                utterance.voice = this.currentVoice;
+            }
+        }
+        
+        setupEventListeners() {
+            // Voice filter changes
+            this.voiceAge.addEventListener('change', () => this.selectOptimalVoice());
+            this.voiceStyle.addEventListener('change', () => this.selectOptimalVoice());
+            this.voiceVariation.addEventListener('change', () => this.selectOptimalVoice());
+            
+            // Range controls
+            this.rateRange.addEventListener('input', () => {
+                this.rateValue.textContent = this.rateRange.value + 'x';
+            });
+            
+            this.pitchRange.addEventListener('input', () => {
+                this.pitchValue.textContent = this.pitchRange.value;
+            });
+            
+            this.volumeRange.addEventListener('input', () => {
+                this.volumeValue.textContent = this.volumeRange.value;
+            });
+            
+            // Voice test button
+            this.voiceTestBtn.addEventListener('click', () => {
+                if (this.currentVoice) {
+                    this.testVoice();
+                }
+            });
+            
+            // Control buttons
+            this.readBtn.addEventListener('click', () => this.startReading());
+            this.pauseBtn.addEventListener('click', () => this.pauseReading());
+            this.resumeBtn.addEventListener('click', () => this.resumeReading());
+            this.stopBtn.addEventListener('click', () => this.stopReading());
+            
+            // Allow clicking on sentences to jump to that position
+            this.readingText.addEventListener('click', (e) => {
+                if (e.target.classList.contains('sentence')) {
+                    const sentenceIndex = parseInt(e.target.dataset.index);
+                    this.jumpToSentence(sentenceIndex);
+                }
+            });
+        }
+        
+        testVoice() {
+            if (this.synthesis.speaking) {
+                this.synthesis.cancel();
+            }
+            
+            const testPhrase = "Hello! This is how I sound with the current voice settings.";
+            const testUtterance = new SpeechSynthesisUtterance(testPhrase);
+            this.applyVoiceEffects(testUtterance);
+            this.synthesis.speak(testUtterance);
+        }
+        
+        prepareSentences(text) {
+            // Split text into sentences
+            const sentences = text.match(/[^\.!?]+[\.!?]+/g) || [text];
+            this.sentences = sentences.map(s => s.trim()).filter(s => s.length > 0);
+            
+            // Display sentences in reading area
+            this.readingText.innerHTML = this.sentences
+                .map((sentence, index) => 
+                    `<span class="sentence" data-index="${index}">${sentence}</span>`
+                ).join(' ');
+        }
+        
+        startReading() {
+            const text = this.textInput.value.trim();
+            if (!text) {
+                alert('Please enter some text to read!');
+                return;
+            }
+            
+            this.stopReading();
+            this.prepareSentences(text);
+            this.currentSentenceIndex = 0;
+            this.readCurrentSentence();
+            this.updateButtonStates('reading');
+        }
+        
+        readCurrentSentence() {
+            if (this.currentSentenceIndex >= this.sentences.length) {
+                this.stopReading();
+                return;
+            }
+            
+            const sentence = this.sentences[this.currentSentenceIndex];
+            this.highlightCurrentSentence();
+            this.updateProgress();
+            
+            this.utterance = new SpeechSynthesisUtterance(sentence);
+            this.applyVoiceEffects(this.utterance);
+            
+            // Event handlers
+            this.utterance.onend = () => {
+                this.currentSentenceIndex++;
+                setTimeout(() => this.readCurrentSentence(), 200);
+            };
+            
+            this.utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event);
+                this.stopReading();
+            };
+            
+            this.synthesis.speak(this.utterance);
+            this.isReading = true;
+            this.isPaused = false;
+        }
+        
+        highlightCurrentSentence() {
+            // Remove previous highlighting
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('current'));
+            
+            // Highlight current sentence
+            const currentSentence = document.querySelector(`[data-index="${this.currentSentenceIndex}"]`);
+            if (currentSentence) {
+                currentSentence.classList.add('current');
+                currentSentence.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        updateProgress() {
+            const progress = this.sentences.length > 0 ? 
+                (this.currentSentenceIndex / this.sentences.length) * 100 : 0;
+            this.progressFill.style.width = progress + '%';
+        }
+        
+        pauseReading() {
+            if (this.isReading && !this.isPaused) {
+                this.synthesis.pause();
+                this.isPaused = true;
+                this.updateButtonStates('paused');
+            }
+        }
+        
+        resumeReading() {
+            if (this.isPaused) {
+                this.synthesis.resume();
+                this.isPaused = false;
+                this.updateButtonStates('reading');
+            }
+        }
+        
+        stopReading() {
+            this.synthesis.cancel();
+            this.isReading = false;
+            this.isPaused = false;
+            this.currentSentenceIndex = 0;
+            
+            // Remove highlighting
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('current'));
+            this.progressFill.style.width = '0%';
+            
+            this.updateButtonStates('stopped');
+        }
+        
+        jumpToSentence(index) {
+            if (this.isReading) {
+                this.synthesis.cancel();
+                this.currentSentenceIndex = index;
+                setTimeout(() => this.readCurrentSentence(), 100);
+            }
+        }
+        
+        updateButtonStates(state) {
+            this.readBtn.disabled = state === 'reading' || state === 'paused';
+            this.pauseBtn.disabled = state !== 'reading';
+            this.resumeBtn.disabled = state !== 'paused';
+            this.stopBtn.disabled = state === 'stopped';
+            
+            // Update status
+            this.status.className = `status ${state}`;
+            switch(state) {
+                case 'reading':
+                    this.status.textContent = '🎵 Reading...';
+                    break;
+                case 'paused':
+                    this.status.textContent = '⏸️ Paused';
+                    break;
+                case 'stopped':
+                    this.status.textContent = '⏹️ Ready to read';
+                    break;
+            }
+        }
+    }
+    
+    // Initialize the application when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        new TextToSpeechReader();
+    });
+    
+    // Handle page visibility changes to pause reading when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && window.reader && window.reader.isReading && !window.reader.isPaused) {
+            window.reader.pauseReading();
+        }
+    });
+</script>
+```
+
+</body>
+</html>
